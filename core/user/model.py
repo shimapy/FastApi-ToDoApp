@@ -1,4 +1,4 @@
-from sqlalchemy import Column,String,Integer,DateTime,Boolean,func
+from sqlalchemy import Column,String,Integer,DateTime,Boolean,func,ForeignKey
 from core.database import Base
 from passlib.context import CryptContext
 from sqlalchemy.orm import relationship
@@ -30,3 +30,15 @@ class UserModel(Base):
     
     def set_password(self, plain_text: str)-> None:
         self.password = self.hash_password(plain_text)
+        
+# روش سوم >> Token Basic  Authentication >> این کلاس برای روش سوم احراز هویت ایجاد شد
+class TokenModel(Base):
+    __tablename__ = "tokens"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    token = Column(String, nullable=False)
+    create_date = Column(DateTime, server_default=func.now())
+    
+    user =relationship("UserModel",uselist=False)
+            

@@ -1,5 +1,5 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI,Depends,Response,Request
 from tasks.routes import router as tasks_routes
 from user.routes import router as users_routes
 
@@ -34,3 +34,90 @@ app = FastAPI(title="Todo Application",
 
 app.include_router(tasks_routes, prefix="/api/v1")
 app.include_router(users_routes)
+
+
+# روش یک >> Basic Authentication (احراز هویت پایه)
+# کد زیر تست ساده و اولیه برای Basic Authentication بود
+# /*from fastapi.security import HTTPBasic,HTTPBasicCredentials
+
+# security = HTTPBasic()
+
+# @app.get("/private")
+# def private_route(credentials: HTTPBasicCredentials=Depends(security)):
+#     print(credentials)
+#     return {"message":"This is a private route."}*/
+
+# /*basic_auth تست ماژول
+# from auth.basic_auth import get_authenticated_user
+# from user.model import UserModel
+
+# @app.get("/private")
+# def private_route(user: UserModel = Depends(get_authenticated_user)):
+#     print(user)
+#     return {"message":"This is a private route."}*/
+
+# روش دو  >> API Key Authentication  >> با توجه به شرایط دو مدل پیاده سازی دارد
+# مدل اول >> API Key Header  
+# /*from fastapi.security import APIKeyHeader
+
+# header_scheme = APIKeyHeader(name="x-key")
+
+# @app.get("/private")
+# def private_route(api_key = Depends(header_scheme)):
+#     print(api_key)
+#     return {"message":"This is a private route."}*/
+
+#مدل دوم >> API Key Query(Query Parameter Authentication)
+# نمونه url >> http://127.0.0.1:8000/private?x-key=hellooo
+# /*from fastapi.security import APIKeyQuery
+
+# query_scheme = APIKeyQuery(name="x-key")
+
+# @app.get("/private")
+# def private_route(api_key = Depends(query_scheme)):
+#     print(api_key)
+#     return {"message":"This is a private route."}*/
+
+# روش سوم >> Token Authentication
+# کد زیر تست ساده و اولیه برای Token Authentication بود
+# /*from fastapi.security import HTTPAuthorizationCredentials,HTTPBearer
+
+# security = HTTPBearer(scheme_name="Token")
+
+# @app.get("/private")
+# def private_route(credentials: HTTPAuthorizationCredentials = Depends(security)):
+#     print(credentials)
+#     return {"message":"This is a private route."}*/
+
+# /*token_auth تست ماژول >> Token Authentication
+# from auth.token_auth import get_authenticated_user
+# from user.model import TokenModel
+
+# @app.get("/private")
+# def private_route(user: TokenModel = Depends(get_authenticated_user)):
+#     print(user.username)
+#     return {"message":"This is a private route."}*/
+
+# jwt_auth تست ماژول >> jwt Authentication
+# from auth.jwt_auth import get_authenticated_user
+
+# @app.get("/private")
+# def private_route(user = Depends(get_authenticated_user)):
+#     print(user.id)
+#     return {"message":"This is a private route."}
+
+# @app.get("/public")
+# def public_route():
+#     return {"message":"This is a public route."}
+
+# تست کوکی
+# /*@app.post("/set-cookie")
+# def set_cookie(response:Response):
+#     response.set_cookie(key="test",value="something")
+#     return {"message":"cookie has been set successfully."}
+
+# @app.get("/get-cookie")
+# def get_cookie(request:Request):
+#     print(request.cookies.get("test"))
+#     return {"message":"cookie has been get successfully."}*/
+    

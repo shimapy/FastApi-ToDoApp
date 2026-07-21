@@ -2,13 +2,18 @@ from typing import List
 from fastapi import APIRouter,Path,Depends,HTTPException,Query,status
 from sqlalchemy.orm import Session
 from fastapi.responses import JSONResponse
-from user.model import UserModel
+from user.model import UserModel,TokenModel
 from user.schemas import *
 from core.database import get_db
+import secrets
+from auth.jwt_auth import generate_access_token,generate_refresh_token,decode_refresh_token
 
 
 router = APIRouter(tags=['users'], prefix="/users")
 
+def generate_token(length=32):
+    return secrets.token_hex(length)
+    
 @router.post("/login")
 async def user_login(request:UserLoginSchema, db:Session=Depends(get_db)):
     user_obj =db.query(UserModel).filter_by(username=request.username.lower()).first()
@@ -16,7 +21,21 @@ async def user_login(request:UserLoginSchema, db:Session=Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="user doesnt exists")
     if not user_obj.verify_password(request.password):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="password is invalid")
-    return {}
+    
+    # روش سوم >> Token Basic  Authentication
+    # /*token_obj = TokenModel(user_id=user_obj.id, token=generate_token())
+    # db.add(token_obj)
+    # db.commit()
+    # db.refresh(token_obj)
+    # return JSONResponse(content={"detail": "logged in successfully",
+    #                              "token":token_obj.token})*/
+    
+    # روش جهارم >> JWT Authentication
+    access_token = generate_access_token(user_obj.id)
+    refresh_token = generate_refresh_token(user_obj.id)
+    return JSONResponse(content={"detail": "logged in successfully",
+                                 "access_token":access_token,
+                                 "refresh_token":refresh_token})
 
 @router.post("/register")
 async def user_register(request:UserRegisterSchema, db:Session=Depends(get_db)):
@@ -32,3 +51,8 @@ async def user_register(request:UserRegisterSchema, db:Session=Depends(get_db)):
     return JSONResponse(status_code=status.HTTP_201_CREATED,
                         content={"detail": "user registered successfully"})
     
+@router.post("/refresh-token")
+async def user_refresh_token(request:UserRefreshTokenSchema, db:Session=Depends(get_db)): 
+    user_id = decode_refresh_token(request.token)
+    access_token = generate_access_token(user_id)
+    return JSONResponse(content={"access_token": access_token})
