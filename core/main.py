@@ -1,5 +1,7 @@
+import time
 from contextlib import asynccontextmanager
 from fastapi import FastAPI,Depends,Response,Request
+from fastapi.middleware.cors import CORSMiddleware
 from tasks.routes import router as tasks_routes
 from user.routes import router as users_routes
 
@@ -35,6 +37,29 @@ app = FastAPI(title="Todo Application",
 app.include_router(tasks_routes, prefix="/api/v1")
 app.include_router(users_routes)
 
+
+@app.middleware("http")
+async def add_process_time_header(request: Request, call_next):
+    start_time = time.perf_counter()  # زمان شروع پردازش درخواست
+    # print("before")
+    response = await call_next(request)  # پردازش درخواست توسط FastAPI
+    # print("after")
+    process_time = time.perf_counter() - start_time  # مدت زمان پردازش محاسبه شود
+    response.headers["X-Process-Time"] = str(process_time)  # اضافه کردن هدر به پاسخ برای نمایش مدت زمان اجرای درخواست
+    return response
+
+origins = [
+    "http://127.0.0.1:5500",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    # allow_origins=["*"],  # اجازه به همه دامنه‌ها (برای محیط توسعه)
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],  # اجازه به همه متدها (GET, POST, PUT, DELETE و ...)
+    allow_headers=["*"],  # اجازه به همه هدرها
+)
 
 # روش یک >> Basic Authentication (احراز هویت پایه)
 # کد زیر تست ساده و اولیه برای Basic Authentication بود

@@ -2,3 +2,4 @@ fastapi[all]>0.139,<0.140
 alembic>1.18,<1.19
 passlib[bcrypt]
 pyjwt
+Faker

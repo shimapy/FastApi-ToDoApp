@@ -1,7 +1,7 @@
 from sqlalchemy import Column,String,Integer,DateTime,Boolean,func,ForeignKey
-from core.database import Base
 from passlib.context import CryptContext
 from sqlalchemy.orm import relationship
+from core.database import Base
 
 # ایجاد یک شیء برای Hash کردن رمز عبور
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -41,4 +41,3 @@ class TokenModel(Base):
     create_date = Column(DateTime, server_default=func.now())
     
     user =relationship("UserModel",uselist=False)
-            
