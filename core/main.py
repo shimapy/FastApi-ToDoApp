@@ -145,4 +145,3 @@ app.add_middleware(
 # def get_cookie(request:Request):
 #     print(request.cookies.get("test"))
 #     return {"message":"cookie has been get successfully."}*/
-    
