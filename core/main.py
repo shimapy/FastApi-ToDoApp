@@ -1,6 +1,9 @@
 import time
 from contextlib import asynccontextmanager
-from fastapi import FastAPI,Depends,Response,Request
+from fastapi import FastAPI,Depends,Response,Request,status
+from starlette.exceptions import HTTPException as StarletteHTTPException
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from tasks.routes import router as tasks_routes
 from user.routes import router as users_routes
@@ -60,6 +63,26 @@ app.add_middleware(
     allow_methods=["*"],  # اجازه به همه متدها (GET, POST, PUT, DELETE و ...)
     allow_headers=["*"],  # اجازه به همه هدرها
 )
+
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request, exc):
+    error_response = {
+        "error": True,
+        "status_code":exc.status_code,
+        "detail" :str(exc.detail)
+    }
+    return JSONResponse(status_code=exc.status_code, content=error_response)
+
+@app.exception_handler(RequestValidationError)
+async def http_validation_exception_handler(request, exc):
+    error_response = {
+        "error": True,
+        "status_code":status.HTTP_422_UNPROCESSABLE_CONTENT,
+        "detail" :"There was a problem with your form request",
+        "content":exc.errors()
+    }
+    return JSONResponse(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                        content=error_response)
 
 # روش یک >> Basic Authentication (احراز هویت پایه)
 # کد زیر تست ساده و اولیه برای Basic Authentication بود

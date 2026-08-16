@@ -18,9 +18,9 @@ def generate_token(length=32):
 async def user_login(request:UserLoginSchema, db:Session=Depends(get_db)):
     user_obj =db.query(UserModel).filter_by(username=request.username.lower()).first()
     if not user_obj:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="user doesnt exists")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid username or password")
     if not user_obj.verify_password(request.password):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="password is invalid")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="password is invalid")
     
     # روش سوم >> Token Basic  Authentication
     # /*token_obj = TokenModel(user_id=user_obj.id, token=generate_token())
@@ -42,9 +42,6 @@ async def user_register(request:UserRegisterSchema, db:Session=Depends(get_db)):
     if db.query(UserModel).filter_by(username=request.username.lower()).first():
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="username already exists")
     user_obj = UserModel(username=request.username.lower())
-    print(type(request.password))
-    print(request.password)
-    print(len(request.password))
     user_obj.set_password(request.password)
     db.add(user_obj)
     db.commit()

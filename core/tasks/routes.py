@@ -19,7 +19,7 @@ async def retrieve_tasks_list(
     offset: int =Query(0, ge=0, description="Use for paginating based on passed items"),
     db:Session=Depends(get_db),
     user:UserModel=Depends(get_authenticated_user)):
-    
+    print("start$$$$")
     query = db.query(TaskModel).filter_by(user_id=user.id)
     if completed is not None:
         query = query.filter_by(is_compelete=completed)

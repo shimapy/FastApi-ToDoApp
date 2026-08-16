@@ -1,5 +1,5 @@
 # روش چهار >> JWT Authentication (احراز هویت بر اساس json web token)
-from datetime import datetime,timedelta
+from datetime import datetime,timedelta,timezone
 from fastapi.security import HTTPAuthorizationCredentials,HTTPBearer
 from fastapi import Depends,HTTPException,status
 from sqlalchemy.orm import Session
@@ -37,7 +37,7 @@ def get_authenticated_user(credentials: HTTPAuthorizationCredentials=Depends(sec
 
 
 def generate_access_token(user_id:int, expires_in:int = 60*5)->str:
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     payload = {
         "type":"access",
         "user_id" : user_id,
@@ -49,7 +49,7 @@ def generate_access_token(user_id:int, expires_in:int = 60*5)->str:
                       algorithm="HS256")
     
 def generate_refresh_token(user_id:int, expires_in:int = 3600*24)->str:
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     payload = {
         "type":"refresh",
         "user_id" : user_id,
